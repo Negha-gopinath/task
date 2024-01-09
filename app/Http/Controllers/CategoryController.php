@@ -33,7 +33,7 @@ class CategoryController extends Controller
     public function update(CategoryRequest $request, $id)
     {
 
-        $category = Category::findOrFail($id);
+        $category = Category::whereId($id);
         $data['name'] = $request->name;
         $category->update($data);
 
@@ -43,6 +43,9 @@ class CategoryController extends Controller
     public function destroy($id)
     {
         $category = Category::findOrFail($id);
+        if($category->product){
+            return $this->errorResponse('Category with id = ' . $id . ' cannot be deleted due to dependency',422 );
+        }
         $category->delete();
         return $this->successResponse('Category with id = ' . $id . ' deleted Successfully', $category, 200);
     }

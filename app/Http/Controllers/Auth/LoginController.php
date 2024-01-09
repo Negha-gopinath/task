@@ -2,38 +2,43 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Admin;
 use App\Http\Controllers\Controller;
-use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use App\Http\Requests\AdminRequest;
+use App\Http\Traits\RespondsTrait;
+use App\Http\Traits\RespondWithTokenTrait;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Login Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller handles authenticating users for the application and
-    | redirecting them to your home screen. The controller uses a trait
-    | to conveniently provide its functionality to your applications.
-    |
-    */
+    use RespondsTrait;
+    use RespondWithTokenTrait;
 
-    use AuthenticatesUsers;
-
-    /**
-     * Where to redirect users after login.
-     *
-     * @var string
-     */
-    protected $redirectTo = '/home';
-
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
+    public function login(AdminRequest $request)
     {
-        $this->middleware('guest')->except('logout');
+        $credentials = request(['email', 'password']);
+        $checkUser = Admin::where('email', $request->email)->first();
+        if (!$checkUser) {
+            return $this->errorResponse("Sorry,We don't recognize this account");
+        }
+      
+        if ( ! (Hash::check($request->password,  $checkUser->password)))
+        {
+            return response()->json(['error' => 'Password Incorrect']);         
+        }
+        if ($token = Auth::attempt(array('email' => $request->email, 'password' => $request->password))) {
+            return $this->respondWithToken("Login Success", $token);
+          
+          
+        }
+
+
+    }
+    public function logout()
+    {
+        auth()->logout();
+
+        return response()->successResponse(['message' => 'Successfully logged out']);
     }
 }

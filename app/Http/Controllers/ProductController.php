@@ -25,13 +25,14 @@ class ProductController extends Controller
 
         $image = $request->file('image');
         if ($image) {
-            $imageUploadedPath = $image->store('product', 'public');
-            $image_path = Storage::disk('public')->url($imageUploadedPath);
-            $data['image'] =  url($imageUploadedPath);
+            $imageName = $image->getClientOriginalName();
+            $imagePath = 'uploads/products';
+            $path =  $imagePath . '/' . $imageName;
+            $imageUploadedPath = $image->move($imagePath, $imageName);
+
+            $data['image'] =  $path;
         }
 
-        // $data['image'] =  $image;
-        dd(  $data);
         Product::create($data);
         return $this->successResponse('Product Added Successfully', $data, 200);
     }
@@ -47,17 +48,37 @@ class ProductController extends Controller
     public function update(ProductRequest $request, $id)
     {
 
-        $product = Product::findOrFail($id);
+        $product = Product::whereId($id);
         $data['name'] = $request->name;
+        $data['category_id'] = $request->category_id;
+        $data['price'] = $request->price;
+
+        $image = $request->file('image');
+        if ($image) {
+            if($product->image != "" && file_exists(storage_path($product->image))){
+                unlink(storage_path($product->image));
+
+            }
+            $imageName = $image->getClientOriginalName();
+            $imagePath = 'uploads/products';
+            $path =  $imagePath . '/' . $imageName;
+            $imageUploadedPath = $image->move($imagePath, $imageName);
+
+            $data['image'] =  $path;
+        }
         $product->update($data);
 
-        return $this->successResponse('Category with id = ' . $id . ' Updated Successfully', $data, 200);
+        return $this->successResponse('Product with id = ' . $id . ' Updated Successfully', $data, 200);
     }
 
     public function destroy($id)
     {
-        $category = Category::findOrFail($id);
-        $category->delete();
-        return $this->successResponse('Category with id = ' . $id . ' deleted Successfully', $category, 200);
+        $product = Product::findOrFail($id);
+        if($product->image != "" && file_exists(storage_path($product->image))){
+            unlink(storage_path($product->image));
+
+        }
+        $product->delete();
+        return $this->successResponse('Product with id = ' . $id . ' deleted Successfully', $product, 200);
     }
 }

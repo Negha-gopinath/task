@@ -21,14 +21,8 @@ class Product extends Model
     //accessors
     public function getImageAttribute($value)
     {
-        return asset('storage/' . $value);
+      
+        return env('APP_URL') .Storage::url($value);
     }
-     //mutuators
-    // public function setImageAttribute()
-    // {
-       
-    //         $this->image ;
-       
-    //     // $this->attributes['image'] = $value->store('images', 'public');
-    // }
+
 }

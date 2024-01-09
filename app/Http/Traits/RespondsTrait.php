@@ -1,7 +1,9 @@
 <?php
+
 namespace App\Http\Traits;
 
-trait RespondsTrait {
+trait RespondsTrait
+{
     protected function successResponse($message, $data = [], $status = 200)
     {
         return response([
@@ -10,5 +12,11 @@ trait RespondsTrait {
             'message' => $message,
         ], $status);
     }
-
+    protected function errorResponse($message,  $status = 422)
+    {
+        return response([
+            'success' => false,
+            'message' => $message,
+        ], $status);
+    }
 }
