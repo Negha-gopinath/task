@@ -4,11 +4,11 @@ namespace App\Http\Traits;
 
 trait RespondWithTokenTrait
 {
-    protected function respondWithToken($message, $token)
+    protected function respondWithToken($message, $response)
     {
         return response()->json([
-            'message' => $message,
-            'access_token' => $token,
+            'message'   => $message,
+            'data'      => $response,
         ]);
     }
 }

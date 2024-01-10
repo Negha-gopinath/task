@@ -17,28 +17,31 @@ class LoginController extends Controller
 
     public function login(AdminRequest $request)
     {
-        $credentials = request(['email', 'password']);
+
+        $credentials = $request->only('email', 'password');
         $checkUser = Admin::where('email', $request->email)->first();
-        if (!$checkUser) {
-            return $this->errorResponse("Sorry,We don't recognize this account");
-        }
-      
-        if ( ! (Hash::check($request->password,  $checkUser->password)))
-        {
-            return response()->json(['error' => 'Password Incorrect']);         
-        }
-        if ($token = Auth::attempt(array('email' => $request->email, 'password' => $request->password))) {
-            return $this->respondWithToken("Login Success", $token);
-          
-          
-        }
 
 
+        if ($token = Auth::guard('api')->attempt($credentials)) {
+            $response = [
+                'id'        =>    $checkUser->id,
+                'name'      =>    $checkUser->name,
+                'email'     =>    $checkUser->email,
+                'mobile'    =>    $checkUser->mobile,
+                'token'     =>    $token,
+
+            ];
+
+            $checkUser->update(['api_token' => hash('sha256', $token)]);
+            return $this->respondWithToken("Login Success", $response);
+        }
+
+        return $this->errorResponse("Login Failed, Check Credentials again", 422);
     }
     public function logout()
     {
         auth()->logout();
 
-        return response()->successResponse(['message' => 'Successfully logged out']);
+        return response()->json(['message' => 'Successfully logged out']);
     }
 }
