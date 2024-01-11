@@ -6,17 +6,14 @@ use Illuminate\Support\Facades\Route;
 
 
 
-// Route::middleware('auth:api')->get('/user', function (Request $request) {
-//     return $request->user();
-// });
-Route::group([
+Route::post('login', [LoginController::class, 'login']);
+Route::get('/category', [App\Http\Controllers\CategoryController::class, 'index']);
+Route::get('/product', [App\Http\Controllers\ProductController::class, 'index']);
 
-    'middleware' => 'api',
+Route::middleware('auth:api')->group(function () {
 
-], function ($router) {
+   Route::resource('/category', CategoryController::class)->except(['index']);
+   Route::resource('/product', ProductController::class)->except(['index']);
 
-    Route::post('/login', [LoginController::class, 'login']);
-    Route::post('logout', [LoginController::class, 'logout']);
+   //  Route::post('logout', [LoginController::class, 'logout']);
 });
-Route::resource('/category', CategoryController::class);
-Route::resource('/product', ProductController::class);
